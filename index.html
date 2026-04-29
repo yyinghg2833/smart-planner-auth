@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>重置密碼 - 智慧計畫本</title>
+  <style>
+    body {
+      margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #38EF7D, #11998E);
+      height: 100vh; display: flex; justify-content: center; align-items: center;
+    }
+    .card {
+      background: white; padding: 40px; border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center;
+    }
+    .logo-container {
+      width: 64px; height: 64px; background: linear-gradient(135deg, #4FC3F7, #29B6F6);
+      border-radius: 50%; display: flex; justify-content: center; align-items: center;
+      margin: 0 auto 20px; color: white; font-size: 32px; font-weight: bold; font-style: italic;
+    }
+    h2 { color: #11998E; margin-top: 0; font-size: 28px;}
+    p { color: #757575; font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+    input {
+      width: 100%; padding: 16px 20px; margin-bottom: 20px; box-sizing: border-box;
+      border: 1px solid #E0E0E0; border-radius: 25px; font-size: 16px; background: #F9F9F9;
+      transition: all 0.3s ease;
+    }
+    input:focus { outline: none; border-color: #29B6F6; background: #FFF; box-shadow: 0 0 8px rgba(41, 182, 246, 0.3); }
+    button {
+      width: 100%; padding: 16px; background: linear-gradient(135deg, #4DD0E1, #1E88E5);
+      color: white; border: none; border-radius: 25px; font-size: 18px; font-weight: bold;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(30, 136, 229, 0.4); }
+    #message { margin-top: 20px; font-weight: bold; font-size: 14px; }
+    .success { color: #38EF7D; }
+    .error { color: #FF5252; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="logo-container">S</div>
+    <h2>設定新密碼</h2>
+    <p>請為您的「智慧計畫本」帳號輸入新的專屬密碼。</p>
+    
+    <form id="reset-form">
+      <input type="password" id="new-password" placeholder="請輸入新密碼 (至少 6 個字元)" required minlength="6">
+      <button type="submit" id="submit-btn">確認重置</button>
+    </form>
+    
+    <div id="message"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ⚠️ 請在這裡填入您的 Supabase 專案網址與金鑰 ⚠️
+    const SUPABASE_URL = 'https://vaesfsvqayiuqnvblxwp.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'sb_publishable_BgNiLGd3RZCkkWjpjujWWw_o_RbLeyc';
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPassword = document.getElementById('new-password').value;
+      const msgDiv = document.getElementById('message');
+      const btn = document.getElementById('submit-btn');
+
+      btn.innerText = '處理中...';
+      btn.disabled = true;
+
+      // 呼叫 Supabase 更新密碼 (Supabase 會自動從網址列抓取 token 進行驗證)
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        msgDiv.className = 'error';
+        msgDiv.innerText = '❌ 重置失敗：' + error.message + ' (請確認您的連結是否已過期)';
+        btn.innerText = '確認重置';
+        btn.disabled = false;
+      } else {
+        msgDiv.className = 'success';
+        msgDiv.innerText = '✅ 密碼重置成功！您可以關閉此網頁，回到「智慧計畫本」App 登入了！';
+        btn.style.display = 'none'; // 隱藏按鈕
+        document.getElementById('new-password').style.display = 'none'; // 隱藏輸入框
+      }
+    });
+  </script>
+</body>
+</html>
